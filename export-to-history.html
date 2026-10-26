@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turn a WhatsApp chat export back into chat history — wakit</title>
+<meta name="description" content="Restore a WhatsApp &quot;Export chat&quot; .zip or _chat.txt as real messages, with photos and voice notes, inside WhatsApp on Android. iPhone and Android export formats.">
+<link rel="canonical" href="https://wakit-site.vercel.app/export-to-history">
+<meta property="og:title" content="Turn a WhatsApp chat export back into chat history">
+<meta property="og:description" content="Restore a WhatsApp &quot;Export chat&quot; .zip or _chat.txt as real messages, with photos and voice notes, inside WhatsApp on Android. iPhone and Android export formats.">
+<meta property="og:image" content="https://wakit-site.vercel.app/gui-guides.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23128c5e'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='Arial'>⇄</text></svg>">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Will re-running it duplicate messages?", "acceptedAnswer": {"@type": "Answer", "text": "No. Messages already in the chat are matched one to one by sender, text and time, so you can import several overlapping exports of the same chat."}}, {"@type": "Question", "name": "Which export formats work?", "acceptedAnswer": {"@type": "Answer", "text": "Both: iPhone ([dd/mm/yyyy, h:mm:ss AM] Name: …) and Android (dd/mm/yyyy, hh:mm - Name: …), in either date order. Group exports aren't supported yet."}}]}</script>
+</head>
+<body>
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><span class="logo" aria-hidden="true">⇄</span>wakit</a>
+    <nav aria-label="Sections">
+      <a href="/#workflows">Workflows</a>
+      <a href="/#faq">FAQ</a>
+      <button class="theme" id="theme" aria-label="Switch light or dark theme">◐</button>
+      <a class="btn small primary keep" href="https://github.com/menaxmaged/wakit">GitHub</a>
+    </nav>
+  </div>
+</div>
+<main class="guide-page">
+  <article class="wrap narrow">
+    <p class="crumbs"><a href="/">wakit</a> / Guides</p>
+    <h1>Turn an exported chat back into WhatsApp history</h1>
+    <p class="lede">"Export chat" gives you a .zip with a <code>_chat.txt</code> and the media, but WhatsApp can't import it back. wakit can. It turns every line into a real message in the right chat, from the right person, at the right time, with photos, voice notes and captions attached.</p>
+    <div class="cta left">
+      <a class="btn primary" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-macos-arm64">Download for Mac</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-windows-x86_64.exe">Windows</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-linux-x86_64">Linux</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit#install-with-pip">pipx install wakit</a>
+    </div>
+
+    <h2>What you need</h2>
+    <ul class="need">
+      <li>A computer with <a href="/">wakit</a></li>
+      <li>The export: a .zip, a folder, or a bare <code>_chat.txt</code>, from an iPhone or an Android phone</li>
+      <li>An Android phone, rooted. <b>No root?</b> Use its end-to-end encrypted backup and the 64-digit key (experimental, below)</li>
+    </ul>
+
+    <h2>Steps</h2>
+    <p class="muted">Prefer clicking? Run <code>wakit gui</code> (or double-click the app): the same steps are under
+    <b>Guides</b>, with file pickers and Dry run / Apply buttons. Every command is a dry run until you add <code>--apply</code>.</p>
+    <ol class="steps">
+      <li><h3>Copy WhatsApp off the phone</h3><pre><span class="p">$</span> wakit device pull --out phone/</pre></li>
+      <li><h3>Dry run</h3><p>wakit reports how many messages it would add and how many are already in the chat. Exported from the other person's phone? Then the "You …" lines are theirs: pass <code>--me</code> with your name as it appears in the export.</p><pre><span class="p">$</span> wakit import --db phone/msgstore.db --export &quot;WhatsApp Chat - Alex.zip&quot; --contact 15551234567</pre></li>
+      <li><h3>Import</h3><p>A backup of the database is made first.</p><pre><span class="p">$</span> wakit import --db phone/msgstore.db --export &quot;WhatsApp Chat - Alex.zip&quot; --contact 15551234567 \
+    --apply --push --phone-root /sdcard/WhatsApp</pre></li>
+      <li><h3>Put it back</h3><pre><span class="p">$</span> wakit device install --db phone/msgstore.db</pre></li>
+    </ol>
+    <h2>No root: use the encrypted backup (experimental)</h2>
+    <p>In WhatsApp, go to Settings → Chats → Chat backup → End-to-end encrypted backup → use a 64-digit key, and back up. Copy <code>msgstore.db.crypt15</code> from <code>Android/media/com.whatsapp/WhatsApp/Databases/</code>. Then:</p>
+    <pre><span class="p">$</span> wakit crypt decrypt --in msgstore.db.crypt15 --key &quot;&lt;64-digit key&gt;&quot; --out msgstore.db
+<span class="p">$</span> wakit import --db msgstore.db --export &quot;WhatsApp Chat - Alex.zip&quot; --contact 15551234567 --apply
+<span class="p">$</span> wakit crypt encrypt --in msgstore.db --like msgstore.db.crypt15 --key &quot;&lt;64-digit key&gt;&quot; --out new/msgstore.db.crypt15</pre>
+    <p class="muted">Copy the new file back into that folder, reinstall WhatsApp and tap Restore. Keep the original file. Restoring an edited backup hasn't been confirmed on a phone yet.</p>
+
+    <h2>What carries over</h2>
+    <p>Text (including multi-line messages), photos, videos, voice notes, stickers, documents, contact cards, captions and deleted-message markers. System notices ("Messages are end-to-end encrypted", missed calls) are skipped, and so are attachments the export left out ("Media omitted").</p>
+
+    <h2>Questions</h2>
+    <div class="faq">
+      <details><summary>Will re-running it duplicate messages?</summary><p>No. Messages already in the chat are matched one to one by sender, text and time, so you can import several overlapping exports of the same chat.</p></details>
+      <details><summary>Which export formats work?</summary><p>Both: iPhone (<code>[dd/mm/yyyy, h:mm:ss AM] Name: …</code>) and Android (<code>dd/mm/yyyy, hh:mm - Name: …</code>), in either date order. Group exports aren't supported yet.</p></details>
+    </div>
+
+    <h2>Other guides</h2>
+    <div class="grid two">
+      <a class="card link" href="/android-to-iphone"><b>Move WhatsApp from Android to iPhone, free</b><span>Transfer WhatsApp history from an Android phone to an iPhone without a paid app and without factory-resetting …</span></a>
+      <a class="card link" href="/iphone-to-android"><b>Move WhatsApp from iPhone to Android</b><span>Bring WhatsApp history from an iPhone backup onto an Android phone, merged chat by chat with the history alrea…</span></a>
+      <a class="card link" href="/merge-databases"><b>Merge an old WhatsApp database into your current one</b><span>Copy the history of an old WhatsApp msgstore.db (old phone, WhatsApp mod, adb backup) into your current one: m…</span></a>
+    </div>
+  </article>
+</main>
+<footer>
+  <div class="wrap">
+    <span>wakit · MIT License · not affiliated with WhatsApp or Meta</span>
+    <span><a href="https://github.com/menaxmaged/wakit">GitHub</a> · <a href="https://github.com/menaxmaged/wakit/blob/main/docs/how-it-works.md">How it works</a> · <a href="https://github.com/menaxmaged/wakit/issues">Issues</a></span>
+  </div>
+</footer>
+<script>
+const root = document.documentElement;
+try { const t = localStorage.getItem("wakit-theme"); if (t) root.dataset.theme = t; } catch {}
+document.getElementById("theme").addEventListener("click", () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = (root.dataset.theme || (dark ? "dark" : "light")) === "dark" ? "light" : "dark";
+  root.dataset.theme = next;
+  try { localStorage.setItem("wakit-theme", next); } catch {}
+});
+</script>
+</body>
+</html>

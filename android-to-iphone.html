@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Move WhatsApp chats from Android to iPhone for free — wakit</title>
+<meta name="description" content="Transfer WhatsApp history from an Android phone to an iPhone without a paid app and without factory-resetting the iPhone. Free, open source, runs on your computer.">
+<link rel="canonical" href="https://wakit-site.vercel.app/android-to-iphone">
+<meta property="og:title" content="Move WhatsApp chats from Android to iPhone for free">
+<meta property="og:description" content="Transfer WhatsApp history from an Android phone to an iPhone without a paid app and without factory-resetting the iPhone. Free, open source, runs on your computer.">
+<meta property="og:image" content="https://wakit-site.vercel.app/gui-guides.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23128c5e'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='Arial'>⇄</text></svg>">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is this the same as Move to iOS?", "acceptedAnswer": {"@type": "Answer", "text": "No. Move to iOS needs a new or erased iPhone and moves everything in one go. wakit adds the Android history to the iPhone's existing WhatsApp, keeping what's already there and skipping duplicates."}}, {"@type": "Question", "name": "Do I need to jailbreak the iPhone?", "acceptedAnswer": {"@type": "Answer", "text": "No. wakit edits a normal unencrypted backup made by Finder, iTunes, 3uTools or wakit itself, and restores it."}}, {"@type": "Question", "name": "Will I lose anything on the iPhone?", "acceptedAnswer": {"@type": "Answer", "text": "A restore brings the whole iPhone back to the moment of the backup. Anything added after that backup is lost, so make it right before. Keep the original backup as your undo."}}, {"@type": "Question", "name": "What happens to WhatsApp on the Android phone?", "acceptedAnswer": {"@type": "Answer", "text": "Once you verify your number on the iPhone, the Android phone is logged out. Its copy of the chats stays where it is."}}]}</script>
+</head>
+<body>
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><span class="logo" aria-hidden="true">⇄</span>wakit</a>
+    <nav aria-label="Sections">
+      <a href="/#workflows">Workflows</a>
+      <a href="/#faq">FAQ</a>
+      <button class="theme" id="theme" aria-label="Switch light or dark theme">◐</button>
+      <a class="btn small primary keep" href="https://github.com/menaxmaged/wakit">GitHub</a>
+    </nav>
+  </div>
+</div>
+<main class="guide-page">
+  <article class="wrap narrow">
+    <p class="crumbs"><a href="/">wakit</a> / Guides</p>
+    <h1>Move WhatsApp from Android to iPhone, free</h1>
+    <p class="lede">WhatsApp's own route (Move to iOS) only works while you set up a new or freshly reset iPhone. wakit merges your Android history into the iPhone you already have, through an ordinary iPhone backup. There's no paid app and nothing leaves your computer.</p>
+    <div class="cta left">
+      <a class="btn primary" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-macos-arm64">Download for Mac</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-windows-x86_64.exe">Windows</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-linux-x86_64">Linux</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit#install-with-pip">pipx install wakit</a>
+    </div>
+
+    <h2>What you need</h2>
+    <ul class="need">
+      <li>A computer (Mac, Windows or Linux) with <a href="/">wakit</a></li>
+      <li>The Android phone, <b>rooted</b>. Or, experimentally, its end-to-end encrypted backup with the 64-digit key</li>
+      <li>The iPhone, a cable, and <code>libimobiledevice</code> for making and restoring backups</li>
+      <li>Free disk space for one full iPhone backup</li>
+    </ul>
+
+    <h2>Steps</h2>
+    <p class="muted">Prefer clicking? Run <code>wakit gui</code> (or double-click the app): the same steps are under
+    <b>Guides</b>, with file pickers and Dry run / Apply buttons. Every command is a dry run until you add <code>--apply</code>.</p>
+    <ol class="steps">
+      <li><h3>Copy WhatsApp off the Android phone</h3><p>wakit disables WhatsApp while it copies, so the database can't change halfway through.</p><pre><span class="p">$</span> wakit device pull --out phone/
+<span class="p">$</span> wakit device pull-media --out phone-media/</pre></li>
+      <li><h3>Make a fresh, full, unencrypted iPhone backup, then copy it</h3><p>Make the backup right before you start, because the restore at the end brings the iPhone back to it. Keep the original untouched: it's your undo.</p><pre><span class="p">$</span> wakit ios-backup backup --out ~/Backups
+<span class="p">$</span> cp -cR ~/Backups/&lt;device-id&gt; ~/Backups/edit/</pre></li>
+      <li><h3>Check both sides</h3><p><code>doctor</code> confirms wakit knows both databases' layouts before anything is written.</p><pre><span class="p">$</span> wakit doctor --path phone/msgstore.db
+<span class="p">$</span> wakit doctor --path ~/Backups/edit/&lt;device-id&gt;</pre></li>
+      <li><h3>Merge Android into the iPhone backup</h3><p>Do a dry run first. Messages the iPhone already has are matched and skipped. Add <code>--apply</code> once the counts look right.</p><pre><span class="p">$</span> wakit to-ios --db phone/msgstore.db --backup ~/Backups/edit/&lt;device-id&gt; --media phone-media/
+<span class="p">$</span> wakit to-ios --db phone/msgstore.db --backup ~/Backups/edit/&lt;device-id&gt; --media phone-media/ --apply</pre></li>
+      <li><h3>Restore the edited backup</h3><p>Turn Find My off, set Auto-Lock to Never and keep the iPhone unlocked until it reboots. Then open WhatsApp, verify your number and skip any iCloud restore.</p><pre><span class="p">$</span> wakit ios-backup restore --backup ~/Backups/edit/&lt;device-id&gt; --yes</pre></li>
+    </ol>
+    <div class="warn">A restore replaces everything on the iPhone with the backup&#x27;s contents. Use a backup made just before, and never restore one cut down to WhatsApp only. wakit refuses those.</div>
+
+    <h2>What carries over</h2>
+    <p>Text, photos, videos, voice notes, stickers, documents, contact cards, locations, replies, stars, and group senders. Reactions, polls and system notices don't carry over.</p>
+
+    <h2>Questions</h2>
+    <div class="faq">
+      <details><summary>Is this the same as Move to iOS?</summary><p>No. Move to iOS needs a new or erased iPhone and moves everything in one go. wakit adds the Android history to the iPhone's existing WhatsApp, keeping what's already there and skipping duplicates.</p></details>
+      <details><summary>Do I need to jailbreak the iPhone?</summary><p>No. wakit edits a normal unencrypted backup made by Finder, iTunes, 3uTools or wakit itself, and restores it.</p></details>
+      <details><summary>Will I lose anything on the iPhone?</summary><p>A restore brings the whole iPhone back to the moment of the backup. Anything added after that backup is lost, so make it right before. Keep the original backup as your undo.</p></details>
+      <details><summary>What happens to WhatsApp on the Android phone?</summary><p>Once you verify your number on the iPhone, the Android phone is logged out. Its copy of the chats stays where it is.</p></details>
+    </div>
+
+    <h2>Other guides</h2>
+    <div class="grid two">
+      <a class="card link" href="/iphone-to-android"><b>Move WhatsApp from iPhone to Android</b><span>Bring WhatsApp history from an iPhone backup onto an Android phone, merged chat by chat with the history alrea…</span></a>
+      <a class="card link" href="/export-to-history"><b>Turn an exported chat back into WhatsApp history</b><span>Restore a WhatsApp &quot;Export chat&quot; .zip or _chat.txt as real messages, with photos and voice notes, inside Whats…</span></a>
+      <a class="card link" href="/merge-databases"><b>Merge an old WhatsApp database into your current one</b><span>Copy the history of an old WhatsApp msgstore.db (old phone, WhatsApp mod, adb backup) into your current one: m…</span></a>
+    </div>
+  </article>
+</main>
+<footer>
+  <div class="wrap">
+    <span>wakit · MIT License · not affiliated with WhatsApp or Meta</span>
+    <span><a href="https://github.com/menaxmaged/wakit">GitHub</a> · <a href="https://github.com/menaxmaged/wakit/blob/main/docs/how-it-works.md">How it works</a> · <a href="https://github.com/menaxmaged/wakit/issues">Issues</a></span>
+  </div>
+</footer>
+<script>
+const root = document.documentElement;
+try { const t = localStorage.getItem("wakit-theme"); if (t) root.dataset.theme = t; } catch {}
+document.getElementById("theme").addEventListener("click", () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = (root.dataset.theme || (dark ? "dark" : "light")) === "dark" ? "light" : "dark";
+  root.dataset.theme = next;
+  try { localStorage.setItem("wakit-theme", next); } catch {}
+});
+</script>
+</body>
+</html>
