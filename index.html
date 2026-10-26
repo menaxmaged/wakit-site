@@ -60,6 +60,7 @@ h1 em { font-style: normal; color: var(--accent); }
 .install code::before { content: "$ "; opacity: .55; }
 .copy { flex: none; border: 1px solid rgba(255,255,255,.18); background: transparent; color: inherit; border-radius: 8px; height: 32px; padding: 0 12px; cursor: pointer; font-size: 13px; }
 .cta { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+.dl-note { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
 .shot { margin: 56px auto 0; max-width: 1040px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 80px -30px rgba(0,0,0,.45); background: var(--panel); }
 .shot .chrome { display: flex; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--line); }
 .shot .chrome i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); display: block; }
@@ -154,9 +155,12 @@ footer .wrap { display: flex; gap: 20px; justify-content: space-between; flex-wr
     <p class="sub">Turn chat exports back into real history, merge old Android databases, and move chats between Android and iPhone — photos, voice notes and stickers included. No subscriptions, no uploads.</p>
     <div class="install"><code id="cmd">pipx install wakit</code><button class="copy" id="copy">Copy</button></div>
     <div class="cta">
-      <a class="btn primary" href="#workflows">See how it works</a>
-      <a class="btn" href="https://github.com/menaxmaged/wakit#readme">Read the docs</a>
+      <a class="btn primary" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-macos-arm64">Download for Mac</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-windows-x86_64.exe">Windows</a>
+      <a class="btn" href="https://github.com/menaxmaged/wakit/releases/latest/download/wakit-linux-x86_64">Linux</a>
+      <a class="btn" href="#workflows">How it works</a>
     </div>
+    <p class="dl-note">No Python needed — double-click to open. Apple silicon Macs; the apps aren't signed yet, so <a href="https://github.com/menaxmaged/wakit#download">see the first-launch step</a>.</p>
     <figure class="shot">
       <div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div>
       <img src="gui-guides.jpg" width="2560" height="1600" alt="The wakit GUI: guides for adding an exported chat to Android, iPhone to Android, and Android to iPhone, each as numbered steps." loading="eager">
